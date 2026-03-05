@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/auth';
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean;
+    subtitle?: string;
   }
 }
 
@@ -23,11 +24,36 @@ const router = createRouter({
       component: GlobalLayout,
       children: [
         { path: '', redirect: '/dashboard' },
-        { path: 'dashboard', name: 'dashboard', component: DashboardPage },
-        { path: 'transactions', name: 'transactions', component: TransactionsPage },
-        { path: 'reports', name: 'reports', component: ReportsPage },
-        { path: 'budgets', name: 'budgets', component: BudgetsPage },
-        { path: 'settings', name: 'settings', component: SettingsPage },
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: DashboardPage,
+          meta: { subtitle: "Here's what's happening with your money today" },
+        },
+        {
+          path: 'transactions',
+          name: 'transactions',
+          component: TransactionsPage,
+          meta: { subtitle: 'View and manage all your transactions' },
+        },
+        {
+          path: 'reports',
+          name: 'reports',
+          component: ReportsPage,
+          meta: { subtitle: 'Analyze your spending and income trends' },
+        },
+        {
+          path: 'budgets',
+          name: 'budgets',
+          component: BudgetsPage,
+          meta: { subtitle: 'Set and track your budgets' },
+        },
+        {
+          path: 'settings',
+          name: 'settings',
+          component: SettingsPage,
+          meta: { subtitle: 'Manage your account and preferences' },
+        },
       ],
     },
     {

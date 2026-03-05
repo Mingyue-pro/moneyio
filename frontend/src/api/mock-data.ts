@@ -53,6 +53,23 @@ export interface Budget {
   updatedAt: string;
 }
 
+export interface Summary {
+  totalBalance: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
+  savingsRate: number;
+}
+
+export interface ChartDataPoint {
+  date: string;
+  income: number;
+  expense: number;
+}
+
+export interface ChartData {
+  data: ChartDataPoint[];
+}
+
 export interface AuthResponse {
   token: string;
   user: User;
