@@ -31,13 +31,40 @@ class Account(models.Model):
     def __str__(self):
         return self.name
 
+# class Category(models.Model):
+#     class CategoryType(models.TextChoices):
+#         INCOME = 'IN', 'Income'
+#         EXPENSE = 'OUT', 'Expense'
+
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
+#     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+#     name = models.CharField(max_length=50)
+#     category_type = models.CharField(max_length=10, choices=CategoryType.choices)
+#     icon_id = models.CharField(max_length=100, null=True, blank=True)
+#     tree_level = models.IntegerField(default=1)
+
+#     class Meta:
+#         db_table = 'categories'
+#         indexes = [
+#             # Optimize by user and category_type
+#             models.Index(fields=['user', 'category_type'], name='idx_categories_user_type'),
+#         ]
+#     def __str__(self):
+#         return self.name
+
 class Category(models.Model):
     class CategoryType(models.TextChoices):
         INCOME = 'IN', 'Income'
         EXPENSE = 'OUT', 'Expense'
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
-    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='children'
+    )
     name = models.CharField(max_length=50)
     category_type = models.CharField(max_length=10, choices=CategoryType.choices)
     icon_id = models.CharField(max_length=100, null=True, blank=True)
@@ -46,9 +73,9 @@ class Category(models.Model):
     class Meta:
         db_table = 'categories'
         indexes = [
-            # Optimize by user and category_type
             models.Index(fields=['user', 'category_type'], name='idx_categories_user_type'),
         ]
+
     def __str__(self):
         return self.name
 

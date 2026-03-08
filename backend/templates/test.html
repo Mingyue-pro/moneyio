@@ -1,138 +1,626 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Auth Test</title>
-</head>
+    <meta charset="UTF-8">
+    <title>MoneyIO Backend Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            line-height: 1.5;
+        }
 
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            display: block;
+            width: 360px;
+            padding: 8px;
+            margin: 6px 0;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin: 6px 6px 6px 0;
+            cursor: pointer;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 14px;
+            border-radius: 10px;
+            min-height: 180px;
+            overflow-x: auto;
+        }
+
+        hr {
+            margin: 14px 0;
+        }
+    </style>
+</head>
 <body>
 
-<h2>Register</h2>
+<h1>MoneyIO Backend Test Page</h1>
+<p class="hint">
+    建议顺序：Register → Login → Get Current User → 自动拉取 Categories / Accounts → 创建父分类/子分类 → Create Transaction → List → Detail → Update → Delete → Logout
+</p>
 
-<input id="username" placeholder="username">
-<input id="email" placeholder="email">
-<input id="password" placeholder="password">
+<div class="section">
+    <h2>1. Register</h2>
+    <input id="reg_username" placeholder="username">
+    <input id="reg_email" placeholder="email">
+    <input id="reg_password" placeholder="password">
+    <button onclick="registerUser()">Register</button>
+</div>
 
-<button onclick="register()">Register</button>
+<div class="section">
+    <h2>2. Login</h2>
+    <input id="login_username" placeholder="username">
+    <input id="login_password" placeholder="password">
+    <button onclick="loginUser()">Login</button>
+    <button onclick="getCurrentUser()">Get Current User</button>
+    <button onclick="logoutUser()">Logout</button>
+</div>
 
-<hr>
+<div class="section">
+    <h2>3. Change Password</h2>
+    <input id="new_password" placeholder="new password">
+    <button onclick="changePassword()">Change Password</button>
+</div>
 
-<h2>Login</h2>
+<div class="section">
+    <h2>4. Load Categories / Accounts</h2>
+    <button onclick="loadCategories()">Load Categories</button>
+    <button onclick="loadAccounts()">Load Accounts</button>
+    <button onclick="loadAllOptions()">Load Both</button>
+</div>
 
-<input id="login_username" placeholder="username">
-<input id="login_password" placeholder="password">
+<div class="section">
+    <h2>5. Category Management</h2>
 
-<button onclick="login()">Login</button>
+    <h3>Create Parent Category</h3>
+    <input id="new_parent_category_name" placeholder="parent category name">
 
-<hr>
+    <select id="new_parent_category_type">
+        <option value="">Select category type</option>
+        <option value="OUT">Expense</option>
+        <option value="IN">Income</option>
+    </select>
 
-<h2>Current User</h2>
+    <button onclick="createParentCategory()">Create Parent Category</button>
 
-<button onclick="getUser()">Get Current User</button>
+    <hr>
 
-<hr>
+    <h3>Create Child Category</h3>
+    <input id="new_child_category_name" placeholder="child category name">
 
-<h2>Change Password</h2>
+    <select id="new_child_category_type">
+        <option value="">Select category type</option>
+        <option value="OUT">Expense</option>
+        <option value="IN">Income</option>
+    </select>
 
-<input id="new_password" placeholder="new password">
+    <select id="new_child_parent_id">
+        <option value="">Select parent category</option>
+    </select>
 
-<button onclick="changePassword()">Change Password</button>
+    <button onclick="createChildCategory()">Create Child Category</button>
 
-<hr>
+    <hr>
 
-<h2>Logout</h2>
+    <button onclick="loadCategories()">Reload Categories</button>
+</div>
 
-<button onclick="logout()">Logout</button>
+<div class="section">
+    <h2>6. Create Transaction</h2>
 
-<hr>
+    <select id="account_id">
+        <option value="">Select account</option>
+    </select>
 
-<h3>Result</h3>
-<pre id="result"></pre>
+    <select id="transaction_type" onchange="handleTransactionTypeChange()">
+        <option value="">Select transaction type</option>
+        <option value="OUT">Expense</option>
+        <option value="IN">Income</option>
+    </select>
 
+    <select id="parent_category_id" onchange="handleParentCategoryChange()">
+        <option value="">Select parent category</option>
+    </select>
+
+    <select id="child_category_id">
+        <option value="">Select child category (optional)</option>
+    </select>
+
+    <input id="amount" placeholder="amount, e.g. 25.50">
+    <input id="trans_date" type="datetime-local">
+    <input id="note" placeholder="note">
+
+    <button onclick="createTransaction()">Create Transaction</button>
+</div>
+
+<div class="section">
+    <h2>7. List Transactions</h2>
+    <button onclick="listTransactions()">List Transactions</button>
+</div>
+
+<div class="section">
+    <h2>8. Transaction Detail / Update / Delete</h2>
+    <input id="detail_tx_id" placeholder="transaction id">
+    <button onclick="getTransactionDetail()">Get Detail</button>
+
+    <hr>
+
+    <input id="update_amount" placeholder="new amount (optional)">
+    <input id="update_note" placeholder="new note (optional)">
+
+    <select id="update_account_id">
+        <option value="">Select new account (optional)</option>
+    </select>
+
+    <select id="update_transaction_type" onchange="handleUpdateTransactionTypeChange()">
+        <option value="">Select new transaction type (optional)</option>
+        <option value="OUT">Expense</option>
+        <option value="IN">Income</option>
+    </select>
+
+    <select id="update_parent_category_id" onchange="handleUpdateParentCategoryChange()">
+        <option value="">Select new parent category (optional)</option>
+    </select>
+
+    <select id="update_child_category_id">
+        <option value="">Select new child category (optional)</option>
+    </select>
+
+    <input id="update_trans_date" type="datetime-local">
+    <button onclick="updateTransaction()">Update Transaction</button>
+
+    <hr>
+
+    <button onclick="deleteTransaction()">Delete Transaction</button>
+</div>
+
+<div class="section">
+    <h2>Result</h2>
+    <pre id="result"></pre>
+</div>
 
 <script>
+    const API_BASE = "http://127.0.0.1:8000/api";
 
-const API = "http://127.0.0.1:8000/api/auth"
+    let categoryTree = [];
+    let accountList = [];
 
+    function showResult(title, data) {
+        document.getElementById("result").textContent =
+            title + "\n\n" + JSON.stringify(data, null, 2);
+    }
 
-function show(data){
-    document.getElementById("result").innerText = JSON.stringify(data, null, 2)
+    async function request(url, options = {}) {
+        try {
+            const response = await fetch(url, {
+                credentials: "include",
+                ...options
+            });
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                data = { error: "Response is not valid JSON" };
+            }
+
+            return {
+                status: response.status,
+                ok: response.ok,
+                data: data
+            };
+        } catch (error) {
+            return {
+                status: 0,
+                ok: false,
+                data: { error: String(error) }
+            };
+        }
+    }
+
+    function setDefaultDateTime() {
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+
+        const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+        document.getElementById("trans_date").value = localDateTime;
+        document.getElementById("update_trans_date").value = localDateTime;
+    }
+
+    function normalizeDateTime(value) {
+        if (!value) return "";
+        if (value.length === 16) return value + ":00";
+        return value;
+    }
+
+    function resetSelect(selectId, defaultText) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = defaultText;
+        select.appendChild(option);
+    }
+
+    function populateAccountSelects() {
+        const createSelect = document.getElementById("account_id");
+        const updateSelect = document.getElementById("update_account_id");
+
+        resetSelect("account_id", "Select account");
+        resetSelect("update_account_id", "Select new account (optional)");
+
+        accountList.forEach(account => {
+            const label = `${account.name} [${account.account_type}] - balance: ${account.balance}`;
+
+            const option1 = document.createElement("option");
+            option1.value = account.id;
+            option1.textContent = label;
+            createSelect.appendChild(option1);
+
+            const option2 = document.createElement("option");
+            option2.value = account.id;
+            option2.textContent = label;
+            updateSelect.appendChild(option2);
+        });
+    }
+
+    function populateParentCategoryManagementOptions() {
+        resetSelect("new_child_parent_id", "Select parent category");
+
+        const select = document.getElementById("new_child_parent_id");
+
+        categoryTree.forEach(parent => {
+            const option = document.createElement("option");
+            option.value = parent.id;
+            option.textContent = `${parent.name} (${parent.category_type})`;
+            select.appendChild(option);
+        });
+    }
+
+    function getParentsByType(type) {
+        return categoryTree.filter(item => item.category_type === type);
+    }
+
+    function populateParentCategories(type, parentSelectId, childSelectId, parentDefaultText, childDefaultText) {
+        resetSelect(parentSelectId, parentDefaultText);
+        resetSelect(childSelectId, childDefaultText);
+
+        if (!type) return;
+
+        const select = document.getElementById(parentSelectId);
+        const parents = getParentsByType(type);
+
+        parents.forEach(parent => {
+            const option = document.createElement("option");
+            option.value = parent.id;
+            option.textContent = parent.name;
+            select.appendChild(option);
+        });
+    }
+
+    function populateChildCategories(parentId, childSelectId, childDefaultText) {
+        resetSelect(childSelectId, childDefaultText);
+
+        if (!parentId) return;
+
+        const parent = categoryTree.find(item => String(item.id) === String(parentId));
+        if (!parent || !parent.children || parent.children.length === 0) return;
+
+        const childSelect = document.getElementById(childSelectId);
+
+        parent.children.forEach(child => {
+            const option = document.createElement("option");
+            option.value = child.id;
+            option.textContent = child.name;
+            childSelect.appendChild(option);
+        });
+    }
+
+    function handleTransactionTypeChange() {
+        const type = document.getElementById("transaction_type").value;
+        populateParentCategories(
+            type,
+            "parent_category_id",
+            "child_category_id",
+            "Select parent category",
+            "Select child category (optional)"
+        );
+    }
+
+    function handleParentCategoryChange() {
+        const parentId = document.getElementById("parent_category_id").value;
+        populateChildCategories(
+            parentId,
+            "child_category_id",
+            "Select child category (optional)"
+        );
+    }
+
+    function handleUpdateTransactionTypeChange() {
+        const type = document.getElementById("update_transaction_type").value;
+        populateParentCategories(
+            type,
+            "update_parent_category_id",
+            "update_child_category_id",
+            "Select new parent category (optional)",
+            "Select new child category (optional)"
+        );
+    }
+
+    function handleUpdateParentCategoryChange() {
+        const parentId = document.getElementById("update_parent_category_id").value;
+        populateChildCategories(
+            parentId,
+            "update_child_category_id",
+            "Select new child category (optional)"
+        );
+    }
+
+    function getSelectedCategoryId(parentSelectId, childSelectId) {
+        const childId = document.getElementById(childSelectId).value;
+        const parentId = document.getElementById(parentSelectId).value;
+        return childId || parentId || "";
+    }
+
+    // ---------- Auth ----------
+
+    async function registerUser() {
+        const payload = {
+            username: document.getElementById("reg_username").value,
+            email: document.getElementById("reg_email").value,
+            password: document.getElementById("reg_password").value
+        };
+
+        const result = await request(`${API_BASE}/auth/register/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        showResult("Register", result);
+    }
+
+    async function loginUser() {
+        const payload = {
+            username: document.getElementById("login_username").value,
+            password: document.getElementById("login_password").value
+        };
+
+        const result = await request(`${API_BASE}/auth/login/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        showResult("Login", result);
+
+        if (result.ok) {
+            await loadCategories();
+            await loadAccounts();
+        }
+    }
+
+    async function getCurrentUser() {
+        const result = await request(`${API_BASE}/auth/me/`, {
+            method: "GET"
+        });
+
+        showResult("Current User", result);
+    }
+
+    async function logoutUser() {
+        const result = await request(`${API_BASE}/auth/logout/`, {
+            method: "POST"
+        });
+
+        showResult("Logout", result);
+    }
+
+    async function changePassword() {
+        const payload = {
+            password: document.getElementById("new_password").value
+        };
+
+        const result = await request(`${API_BASE}/auth/change-password/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        showResult("Change Password", result);
+    }
+
+    // ---------- Categories / Accounts ----------
+
+    async function loadCategories() {
+        const result = await request(`${API_BASE}/categories/`, {
+            method: "GET"
+        });
+
+        if (result.ok && result.data.results) {
+            categoryTree = result.data.results;
+            populateParentCategoryManagementOptions();
+        }
+
+        showResult("Load Categories", result);
+    }
+
+    async function loadAccounts() {
+        const result = await request(`${API_BASE}/accounts/`, {
+            method: "GET"
+        });
+
+        if (result.ok && result.data.results) {
+            accountList = result.data.results;
+            populateAccountSelects();
+        }
+
+        showResult("Load Accounts", result);
+    }
+
+    async function loadAllOptions() {
+        await loadCategories();
+        await loadAccounts();
+    }
+
+    async function createParentCategory() {
+    const payload = {
+        name: document.getElementById("new_parent_category_name").value,
+        category_type: document.getElementById("new_parent_category_type").value
+    };
+
+    const result = await request(`${API_BASE}/categories/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    showResult("Create Parent Category", result);
+
+    if (result.ok) {
+        await loadCategories();
+
+        // 刷新交易创建区
+        handleTransactionTypeChange();
+        handleParentCategoryChange();
+
+        // 刷新交易更新区
+        handleUpdateTransactionTypeChange();
+        handleUpdateParentCategoryChange();
+    }
 }
 
+    async function createChildCategory() {
+    const payload = {
+        name: document.getElementById("new_child_category_name").value,
+        category_type: document.getElementById("new_child_category_type").value,
+        parent_id: document.getElementById("new_child_parent_id").value
+    };
 
-async function register(){
+    const result = await request(`${API_BASE}/categories/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
 
-    const res = await fetch(`${API}/register/`,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            username:document.getElementById("username").value,
-            email:document.getElementById("email").value,
-            password:document.getElementById("password").value
-        })
-    })
+    showResult("Create Child Category", result);
 
-    show(await res.json())
+    if (result.ok) {
+        await loadCategories();
+
+        // 刷新交易创建区
+        handleTransactionTypeChange();
+        handleParentCategoryChange();
+
+        // 刷新交易更新区
+        handleUpdateTransactionTypeChange();
+        handleUpdateParentCategoryChange();
+    }
 }
 
+    // ---------- Transactions ----------
 
-async function login(){
+    async function createTransaction() {
+        const selectedCategoryId = getSelectedCategoryId("parent_category_id", "child_category_id");
 
-    const res = await fetch(`${API}/login/`,{
-        method:"POST",
-        credentials:"include",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            username:document.getElementById("login_username").value,
-            password:document.getElementById("login_password").value
-        })
-    })
+        const payload = {
+            account_id: document.getElementById("account_id").value,
+            category_id: selectedCategoryId,
+            amount: document.getElementById("amount").value,
+            trans_date: normalizeDateTime(document.getElementById("trans_date").value),
+            note: document.getElementById("note").value
+        };
 
-    show(await res.json())
-}
+        const result = await request(`${API_BASE}/transactions/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
+        showResult("Create Transaction", result);
+    }
 
-async function getUser(){
+    async function listTransactions() {
+        const result = await request(`${API_BASE}/transactions/`, {
+            method: "GET"
+        });
 
-    const res = await fetch(`${API}/me/`,{
-        credentials:"include"
-    })
+        showResult("List Transactions", result);
+    }
 
-    show(await res.json())
-}
+    async function getTransactionDetail() {
+        const txId = document.getElementById("detail_tx_id").value;
 
+        const result = await request(`${API_BASE}/transactions/${txId}/`, {
+            method: "GET"
+        });
 
-async function changePassword(){
+        showResult("Transaction Detail", result);
+    }
 
-    const res = await fetch(`${API}/change-password/`,{
-        method:"POST",
-        credentials:"include",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            password:document.getElementById("new_password").value
-        })
-    })
+    async function updateTransaction() {
+        const txId = document.getElementById("detail_tx_id").value;
+        const payload = {};
 
-    show(await res.json())
-}
+        const amount = document.getElementById("update_amount").value;
+        const note = document.getElementById("update_note").value;
+        const accountId = document.getElementById("update_account_id").value;
+        const transDate = document.getElementById("update_trans_date").value;
+        const categoryId = getSelectedCategoryId("update_parent_category_id", "update_child_category_id");
 
+        if (amount) payload.amount = amount;
+        if (note) payload.note = note;
+        if (accountId) payload.account_id = accountId;
+        if (transDate) payload.trans_date = normalizeDateTime(transDate);
+        if (categoryId) payload.category_id = categoryId;
 
-async function logout(){
+        const result = await request(`${API_BASE}/transactions/${txId}/`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    const res = await fetch(`${API}/logout/`,{
-        method:"POST",
-        credentials:"include"
-    })
+        showResult("Update Transaction", result);
+    }
 
-    show(await res.json())
-}
+    async function deleteTransaction() {
+        const txId = document.getElementById("detail_tx_id").value;
 
+        const result = await request(`${API_BASE}/transactions/${txId}/`, {
+            method: "DELETE"
+        });
+
+        showResult("Delete Transaction", result);
+    }
+
+    window.onload = function () {
+        setDefaultDateTime();
+    };
 </script>
 
 </body>

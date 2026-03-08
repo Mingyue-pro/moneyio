@@ -4,12 +4,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
 
-from .services_transactions import (
-    create_transaction_for_user,
-    list_transactions_for_user,
-    get_transaction_for_user,
-    update_transaction_for_user,
-    delete_transaction_for_user,
+from .services_categories import (
+    build_category_tree_for_user,
+    create_category_for_user,
+    get_category_for_user,
+    update_category_for_user,
+    delete_category_for_user,
 )
 
 
@@ -20,42 +20,22 @@ def _require_login(request):
 
 
 @csrf_exempt
-def transactions_collection(request):
+def categories_collection(request):
     auth_error = _require_login(request)
     if auth_error:
         return auth_error
 
     if request.method == "GET":
-        transactions = list_transactions_for_user(request.user)
-        results = []
-
-        for tx in transactions:
-            results.append({
-                "id": tx.id,
-                "amount": str(tx.amount),
-                "trans_date": tx.trans_date.isoformat(),
-                "note": tx.note,
-                "account": {
-                    "id": tx.account.id,
-                    "name": tx.account.name,
-                    "account_type": tx.account.account_type,
-                },
-                "category": {
-                    "id": tx.category.id,
-                    "name": tx.category.name,
-                    "category_type": tx.category.category_type,
-                }
-            })
-
+        results = build_category_tree_for_user(request.user)
         return JsonResponse({"results": results})
 
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            tx = create_transaction_for_user(request.user, data)
+            category = create_category_for_user(request.user, data)
             return JsonResponse({
                 "status": "success",
-                "transaction_id": tx.id
+                "category_id": category.id
             })
         except json.JSONDecodeError:
             return JsonResponse({"error": "invalid JSON"}, status=400)
@@ -66,31 +46,31 @@ def transactions_collection(request):
 
 
 @csrf_exempt
-def transactions_item(request, tx_id):
+def categories_item(request, category_id):
     auth_error = _require_login(request)
     if auth_error:
         return auth_error
 
     if request.method == "GET":
-        tx = get_transaction_for_user(request.user, tx_id)
-        if not tx:
+        category = get_category_for_user(request.user, category_id)
+        if not category:
             return JsonResponse({"error": "not found"}, status=404)
 
         return JsonResponse({
-            "id": tx.id,
-            "amount": str(tx.amount),
-            "trans_date": tx.trans_date.isoformat(),
-            "note": tx.note,
-            "account_id": tx.account.id,
-            "category_id": tx.category.id
+            "id": category.id,
+            "name": category.name,
+            "category_type": category.category_type,
+            "icon_id": category.icon_id,
+            "tree_level": category.tree_level,
+            "parent_id": category.parent.id if category.parent else None,
         })
 
     if request.method in ("PUT", "PATCH"):
         try:
             data = json.loads(request.body)
-            tx = update_transaction_for_user(request.user, tx_id, data)
+            category = update_category_for_user(request.user, category_id, data)
 
-            if not tx:
+            if not category:
                 return JsonResponse({"error": "not found"}, status=404)
 
             return JsonResponse({"status": "success"})
@@ -100,7 +80,7 @@ def transactions_item(request, tx_id):
             return JsonResponse({"error": e.message}, status=400)
 
     if request.method == "DELETE":
-        ok = delete_transaction_for_user(request.user, tx_id)
+        ok = delete_category_for_user(request.user, category_id)
 
         if not ok:
             return JsonResponse({"error": "not found"}, status=404)
