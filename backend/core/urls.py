@@ -1,6 +1,6 @@
 from django.urls import path
 from .views_auth import register, login_view, logout_view, current_user, change_password, test_page
-from .views_transactions import transactions_collection, transactions_item
+from .views_transactions import transactions_collection, transactions_item, transactions_summary
 from .views_categories import categories_collection, categories_item
 from .views_accounts import accounts_collection, accounts_item
 
@@ -24,6 +24,8 @@ urlpatterns = [
     path("categories/<int:category_id>/", categories_item),
 
     # Transactions
+    path("transactions/summary/", transactions_summary),
+    
     path("transactions/", transactions_collection),
     path("transactions/<int:tx_id>/", transactions_item),
 ]
