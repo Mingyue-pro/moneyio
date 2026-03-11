@@ -237,10 +237,10 @@ def transactions_summary(request):
 
         # Maintain consistency with front-end.
         return JsonResponse({
-            "period": f"{this_year}year{this_month}month",
-            "income": float(total_income),
-            "expense": abs(float(total_expense)),
-            "net_balance": balance
+            "period": f"{this_year}-{this_month:02d}",
+            "income": str(total_income),
+            "expense": str(abs(total_expense)),
+            "net_balance": str(balance)
         })
 
     return JsonResponse({"error": "method not allowed"}, status=405)
