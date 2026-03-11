@@ -233,7 +233,7 @@ def transactions_summary(request):
         total_expense = expense_data['amount__sum'] or 0.0
 
         # The balance with income and expense
-        balance = float(total_income) - float(total_expense)
+        balance = total_income - total_expense
 
         # Maintain consistency with front-end.
         return JsonResponse({
