@@ -110,11 +110,16 @@ async function submitForm(): Promise<void> {
         balance: form.balance === '' ? 0 : Number(form.balance),
       });
     } else {
-      await mockAPI.accounts.createAccount({
+      const payload: Omit<Account, 'id' | 'userId' | 'balance'> & { balance?: number } = {
         name: form.name.trim(),
         type: form.type,
-        balance: form.balance === '' ? undefined : Number(form.balance),
-      });
+      };
+
+      if (form.balance !== '') {
+        payload.balance = Number(form.balance);
+      }
+
+      await mockAPI.accounts.createAccount(payload);
     }
     emit('saved');
     handleClose();

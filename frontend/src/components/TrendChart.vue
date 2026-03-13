@@ -50,13 +50,11 @@ function smoothCurve(pts: Array<{ x: number; y: number }>): string {
   if (pts.length < 2) return '';
   const firstPoint = pts[0];
   if (!firstPoint) return '';
-
   let d = `M${firstPoint.x},${firstPoint.y}`;
   for (let i = 0; i < pts.length - 1; i++) {
     const p1 = pts[i];
     const p2 = pts[i + 1];
     if (!p1 || !p2) continue;
-
     const p0 = pts[Math.max(0, i - 1)] ?? p1;
     const p3 = pts[Math.min(pts.length - 1, i + 2)] ?? p2;
     const cp1x = p1.x + (p2.x - p0.x) / 6;
@@ -77,16 +75,16 @@ const expenseLine = computed(() =>
 
 const incomeArea = computed(() => {
   if (!incomeLine.value || chartPoints.value.length === 0) return '';
-  const first = chartPoints.value.at(0);
-  const last = chartPoints.value.at(-1);
+  const first = chartPoints.value[0];
+  const last = chartPoints.value[chartPoints.value.length - 1];
   if (!first || !last) return '';
   return `${incomeLine.value} L${last.x},${bottomY} L${first.x},${bottomY} Z`;
 });
 
 const expenseArea = computed(() => {
   if (!expenseLine.value || chartPoints.value.length === 0) return '';
-  const first = chartPoints.value.at(0);
-  const last = chartPoints.value.at(-1);
+  const first = chartPoints.value[0];
+  const last = chartPoints.value[chartPoints.value.length - 1];
   if (!first || !last) return '';
   return `${expenseLine.value} L${last.x},${bottomY} L${first.x},${bottomY} Z`;
 });

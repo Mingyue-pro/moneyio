@@ -138,7 +138,7 @@ async function submitForm(): Promise<void> {
       amount: Number(form.amount),
       categoryId,
       accountId,
-      note: form.notes || null,
+      note: form.notes.trim() === '' ? null : form.notes,
       transactionDate,
     };
     await mockAPI.transactions.createTransaction(transaction);

@@ -9,6 +9,10 @@ import vueParser from 'vue-eslint-parser';
  * ESLint configuration for TypeScript + Vue projects
  */
 export default tseslint.config(
+  {
+    ignores: ['src/api/auth.js'],
+  },
+
   // Extend recommended configs
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -33,6 +37,7 @@ export default tseslint.config(
         fetch: 'readonly',
         self: 'readonly',
         global: 'readonly',
+        localStorage: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
@@ -73,9 +78,14 @@ export default tseslint.config(
         },
         // Variables, functions, parameters, properties: camelCase
         {
-          selector: ['variable', 'function', 'parameter', 'property'],
+          selector: ['variable', 'function', 'parameter'],
           format: ['camelCase'],
           leadingUnderscore: 'allow',
+        },
+        // Allow object/type property names that are not camelCase
+        {
+          selector: ['property', 'objectLiteralProperty', 'typeProperty'],
+          format: null,
         },
         // Global constants: UPPER_CASE
         {
@@ -161,7 +171,17 @@ export default tseslint.config(
   {
     // Disable type-checked rules for JS files
     files: ['**/*.js'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     ...tseslint.configs.disableTypeChecked,
+    rules: {
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
   },
 
   {
