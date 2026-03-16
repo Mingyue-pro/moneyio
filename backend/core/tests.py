@@ -1,12 +1,11 @@
-from django.test import TestCase
 from decimal import Decimal
 
+from django.test import TestCase
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
+
 from core.models import Account, Budget, Category, Transaction, User
-
-
 
 
 class TransactionAPITests(APITestCase):
@@ -382,7 +381,7 @@ class AccountModelTests(TestCase):
             user = self.user, name = "Test Account", account_type = "Card"
         )
         self.assertEqual(str(acc), "Test Account")
-    
+
     def test_account_related_transactions(self):
         acc = Account.objects.create(
             user=self.user, name="Account", account_type="Card"
@@ -484,6 +483,3 @@ class BudgetModelTests(TestCase):
         )
         self.assertIn("2026", str(b))
         self.assertIn("Budget", str(b))
-
-    
-
